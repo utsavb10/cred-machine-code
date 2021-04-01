@@ -1,5 +1,6 @@
 package com.test.domain.entity;
 
+import com.test.domain.entity.impl.Lane;
 import com.test.domain.entity.impl.Participant;
 
 import java.util.List;
@@ -10,4 +11,5 @@ public interface Game {
 	Game endGame();
 	ScoreBoard getScoreBoard();
 	String callNextPlayer();
+	void unlockLane(Lane lane);
 }

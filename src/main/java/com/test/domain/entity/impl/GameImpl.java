@@ -13,7 +13,10 @@ public class GameImpl implements Game {
 	private Set<Participant> participants;
 	private ScoreBoard scoreBoard;
 	private LaneInfo laneInfo;
-	private Map<Participant, Lane> participantLaneMap;
+	private List<Lane> laneQuota;
+
+	// implement player-lane based lock mechanism such that a lane is blocked by player till player completes all throws for a round
+	private Map<Lane, Participant> participantLaneMap;
 
 	@Override
 	public Game startGame(List<Participant> participants) {
@@ -21,11 +24,12 @@ public class GameImpl implements Game {
 		this.participants.addAll(participants);
 		this.gameId = new Random().nextLong();
 		this.scoreBoard = new ScoreInfo(participants);
-		laneInfo = null; //Get lane info from factory method
+		laneInfo = LaneInfoImpl.getLaneInfo();
 		participantLaneMap = new HashMap<>();
-		for(Participant participant : participants){
-			participantLaneMap.put(participant, laneInfo.getEmptyLane(this, participant));
+		for(Lane lane : laneQuota){
+			participantLaneMap.put(lane, null);
 		}
+		laneQuota = laneInfo.getLaneQuota(this);
 		return this;
 	}
 
@@ -38,7 +42,23 @@ public class GameImpl implements Game {
 	@Override
 	public String callNextPlayer() {
 		Participant nextPlayer = scoreBoard.getNextPlayer();
-		return (nextPlayer.getUserName() + " bowl at " + getParticipantLaneMap().get(nextPlayer).getLaneId());
+		Lane availableLane = participantLaneMap.keySet().stream()
+			.filter(lane -> null == participantLaneMap.get(lane))
+			.findFirst()
+			.orElse(null);
+
+		if(null != availableLane && null != nextPlayer){
+			participantLaneMap.put(availableLane, nextPlayer);
+			return (nextPlayer.getUserName() + " bowl at " + availableLane.getLaneId());
+		}
+		return "all assigned lanes busy";
+	}
+
+	@Override
+	public void unlockLane(Lane lane) {
+		if(null != participantLaneMap && participantLaneMap.containsKey(lane)){
+			participantLaneMap.put(lane, null);
+		}
 	}
 
 	public Long getGameId() {
@@ -74,11 +94,19 @@ public class GameImpl implements Game {
 		this.laneInfo = laneInfo;
 	}
 
-	public Map<Participant, Lane> getParticipantLaneMap() {
+	public List<Lane> getLaneQuota() {
+		return laneQuota;
+	}
+
+	public void setLaneQuota(List<Lane> laneQuota) {
+		this.laneQuota = laneQuota;
+	}
+
+	public Map<Lane, Participant> getParticipantLaneMap() {
 		return participantLaneMap;
 	}
 
-	public void setParticipantLaneMap(Map<Participant, Lane> participantLaneMap) {
+	public void setParticipantLaneMap(Map<Lane, Participant> participantLaneMap) {
 		this.participantLaneMap = participantLaneMap;
 	}
 }

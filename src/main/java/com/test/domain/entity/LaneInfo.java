@@ -3,7 +3,9 @@ package com.test.domain.entity;
 import com.test.domain.entity.impl.Lane;
 import com.test.domain.entity.impl.Participant;
 
+import java.util.List;
+
 public interface LaneInfo {
 
-	Lane getEmptyLane(Game g, Participant p);
+	List<Lane> getLaneQuota(Game g);
 }
