@@ -55,6 +55,19 @@ public class GameImpl implements Game {
 	}
 
 	@Override
+	public void addThrow(Participant p, Integer pegsDown) {
+		boolean laneLockFlag = scoreBoard.addThrow(p, pegsDown);
+		if(!laneLockFlag){
+			unlockLane(participantLaneMap.entrySet()
+				.stream()
+				.filter(laneParticipantEntry -> p.getUserId().equals(laneParticipantEntry.getValue().getUserId()))
+				.findFirst()
+				.get()
+				.getKey());
+		}
+	}
+
+	@Override
 	public void unlockLane(Lane lane) {
 		if(null != participantLaneMap && participantLaneMap.containsKey(lane)){
 			participantLaneMap.put(lane, null);

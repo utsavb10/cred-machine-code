@@ -7,7 +7,7 @@ public class ThrowImpl implements Throw {
 	private Integer currentScore;
 	private Integer currentRound;
 	private Throw prevThrow;
-	private Integer retryCount;
+	private Integer throwCount;
 	private Integer remainingPegs;
 
 	public ThrowImpl(Participant participant){
@@ -15,13 +15,48 @@ public class ThrowImpl implements Throw {
 		this.participant = participant;
 		currentRound = 1;
 		currentScore = 0;
-		retryCount = 0;
+		throwCount = 0;
 		remainingPegs = 10;
 	}
 
-	public ThrowImpl(Throw prevThrow){
+	public ThrowImpl(Throw prevThrow, Integer pegsDown){
 		this.prevThrow = prevThrow;
 		this.participant = prevThrow.getParticipant();
+		if(prevThrow.getThrowCount() == 0){
+			throwCount++;
+			remainingPegs = 10 - pegsDown;
+		} else {
+			throwCount = prevThrow.getThrowCount() + 1;
+			remainingPegs = prevThrow.getRemainingPegs() - pegsDown;
+		}
+		if(remainingPegs < 0) { //error
+		}
+		currentScore = prevThrow.getScore() + pegsDown;
+		if(remainingPegs == 0 && throwCount==1){
+			currentScore += 10;
+		} else if(remainingPegs == 0 && throwCount==2){
+			currentScore += 5;
+		}
+
+		if( (remainingPegs == 0 || throwCount==2 ) && currentRound < 10){
+			currentRound += prevThrow.getCurrentRound();
+			remainingPegs = 10;
+			throwCount = 0;
+		} else if(currentRound == 10){
+			if(throwCount == 1 && remainingPegs == 0){
+				throwCount = 2;
+				remainingPegs = 10;
+			} else if(throwCount == 2 && remainingPegs == 0){
+				remainingPegs = 10;
+			} else if(throwCount == 3){
+				currentRound++;
+			}
+		}
+	}
+
+	@Override
+	public Throw addThrow(Integer pegsDown) {
+		return new ThrowImpl(this, pegsDown);
 	}
 
 	@Override
@@ -69,11 +104,11 @@ public class ThrowImpl implements Throw {
 		this.remainingPegs = remainingPegs;
 	}
 
-	public Integer getRetryCount() {
-		return retryCount;
+	public Integer getThrowCount() {
+		return throwCount;
 	}
 
-	public void setRetryCount(Integer retryCount) {
-		this.retryCount = retryCount;
+	public void setThrowCount(Integer throwCount) {
+		this.throwCount = throwCount;
 	}
 }

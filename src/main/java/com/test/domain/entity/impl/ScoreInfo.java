@@ -40,6 +40,19 @@ public class ScoreInfo implements ScoreBoard {
 			.getKey();
 	}
 
+	@Override
+	public boolean addThrow(Participant p, Integer pegs) {
+		Throw prevThrow = participantThrowMap.get(p);
+		Throw currentThrow = prevThrow.addThrow(pegs);
+		participantThrowMap.put(p, currentThrow);
+		if(currentThrow.getCurrentRound() == prevThrow.getCurrentRound()){
+			return true;
+		}
+		return false;
+	}
+
+
+
 	public Map<Participant, Throw> getParticipantThrowMap() {
 		return participantThrowMap;
 	}

@@ -11,5 +11,6 @@ public interface Game {
 	Game endGame();
 	ScoreBoard getScoreBoard();
 	String callNextPlayer();
+	void addThrow(Participant p, Integer pegsDown);
 	void unlockLane(Lane lane);
 }
